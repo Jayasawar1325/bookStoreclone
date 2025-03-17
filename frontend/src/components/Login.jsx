@@ -1,14 +1,42 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-
+import toast from 'react-hot-toast';
+import axios from 'axios';
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   // Handle form submission
-  const onSubmit = (data) => {
-    console.log(data);
-  };
+  const onSubmit = async (data) => {
+    const userInfo = {
+        email: data.email,
+        password: data.password
+    };
+
+    try {
+        const res = await axios.post('http://localhost:4001/api/v1/auth/login', userInfo);
+        if (res.data) {
+          toast.success('LoggedIn Successfully!');
+          document.getElementById('my_modal_3').close();
+          setTimeout(()=>{
+            window.location.reload()
+            localStorage.setItem('Users',JSON.stringify(res.data.user))
+
+          },1000)
+        }
+    } catch (err) {
+        if (err.response) {
+            console.error("Server Error:", err.response.data);
+            toast.error('Error: ' + err.response.data.message || "Something went wrong");
+        } else if (err.request) {
+            console.error("Request Error:", err.request);
+            alert('Network Error: No response received');
+        } else {
+            console.error("Axios Error:", err.message);
+            alert('Error: ' + err.message);
+        }
+    }
+};
 
   return (
     <dialog id="my_modal_3" className="modal">
